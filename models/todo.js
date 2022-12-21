@@ -10,7 +10,8 @@ const TodoSchema = new mongoose.Schema({
 });               // 확인하는 칼럼
 
 
-TodoSchema.virtual("todoId").get(function () { return this._id
+TodoSchema.virtual("todoId").get(function () { 
+  return this._id
 });
 // 화살표 함수에 this 사용하면 안된다.
 

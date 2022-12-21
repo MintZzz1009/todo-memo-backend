@@ -6,8 +6,10 @@ const mongoose = require("mongoose");
 // Database Name은 todo-demo 입니다.
 
 mongoose.connect("mongodb://127.0.0.1:27017/todo-demo", {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
+  // useNewUrlParser: true,
+  // useUnifiedTopology: true,
+  // https://mongoosejs.com/docs/migrating_to_6.html#strictquery-is-removed-and-replaced-by-strict
+  // no longer necessary
 })
   .then(value => console.log("MongoDB 연결에 성공하였습니다."))
   .catch(reason => console.log("MongoDB 연결에 실패하였습니다."))

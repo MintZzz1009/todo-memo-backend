@@ -10,7 +10,10 @@ const TodoSchema = new mongoose.Schema({
 });               // 확인하는 칼럼
 
 
-TodoSchema.virtual("todoId").get(() => this._id.toHexString());
+TodoSchema.virtual("todoId").get(function () { return this._id
+});
+// 화살표 함수에 this 사용하면 안된다.
+
 // Schema.virtual("가상칼럼명") 
 // todoId: _id.toHexString()을 TodoSchema에 추가.
 // => 프론트에서 데이터를 보낼 때 필요한 가상의 칼럼을 스키마에 생성

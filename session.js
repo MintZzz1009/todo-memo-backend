@@ -53,35 +53,54 @@ console.log(sessionKey) // 1671684736211
 });
 
 
+function encoded(...decoded_string) {
+  const secretKey = '[ If available, I want to add client-IP-address ]' + Date.now() + '__SECRET_KEY__' + new Date() + '__'
+  return secretKey + decoded_string
+  // 예시) JWT는 실제로는 base64UrlEncode 를 기반으로한 HMACSHA256 알고리즘 등을 사용한다.
+}
+
 // 연습문제
 // - GET Method로 http://localhost:3000/set을 호출했을 때, name에 nodejs가 저장된 쿠키를 할당하고
 // - GET Method로http://localhost:3000/get을 호출했을 때, 쿠키에 등록된 정보들이 반환되는 API를 만들어주세요!
-let haksoo_session = {}
+let server_session = {}
 app.get('/set', function (req, res, next) {
-  let sessionValue = 'nodejs'
-
-  const uniqueInt = Date.now();
-  haksoo_session[uniqueInt] = { 'name': sessionValue }
+  // let receiveData = encoded(req.encoded.data)
+  let Id = 'req.encoded.Id'     // 실제로는 로그인 id값
+  let Pw = 'req.encoded.Pw'     // 실제로는 로그인 pw값
+  let Lang = 'req.encoded.Lang' // 실제로는 언어 설정
+  let uniqueKey = encoded('req.encoded.Id' + 'req.encoded.Pw' + 'req.encoded.Lang')
+  server_session[uniqueKey] = { Id, Pw, Lang }  // session에 저장한 데이터의 키값들을 저장하는 객체
+  // server-session === { uniqueKey: { Id, Pw, Lang }}
   
   const expires = new Date()
   expires.setHours(expires.getHours() + 2)
 
-  console.log(haksoo_session) // { '1671707751991': { name: 'nodejs' } }
+  console.log(server_session) // { '1671707751991': { name: 'nodejs' } }
 
   res.status(200)
-    .cookie('uniqueInt', uniqueInt, { expires })  // uniqueInt=1671707751991; Path=/; Expires=Thu, 22 Dec 2022 13:15:51 GMT
-    .send(`세션키 발행: ${uniqueInt}, 유효기간: ${expires}`)
+    .cookie('uniqueKey', uniqueKey, { expires })  // uniqueInt=1671707751991; Path=/; Expires=Thu, 22 Dec 2022 13:15:51 GMT
+    .send(`세션키 발행: ${uniqueKey}, 유효기간: ${expires}`)
     .end(0)
 })
 
 
 app.get('/get', function (req, res, next) {
-  const { uniqueInt } = req.cookies
-  console.log(uniqueInt)  // 1671707751991
-  const sessionValue = haksoo_session[uniqueInt]   // { 'name': uniqueInt }
-  console.log(haksoo_session) // { '1671707751991': { name: 'nodejs' } }
-  return res.status(200).json({ uniqueInt: sessionValue }); 
-  // "uniqueInt": { "name": "nodejs" }
-})
+  const { uniqueKey } = req.cookies
+  console.log(uniqueKey)  // 1671707751991
+  const sessionData = server_session[uniqueKey]   // sessionData = { sessionId, sessionPw, sessionLang }
+ 
+  if (!sessionData) {
+    return res
+      .status(404)
+      .json({ msg: 'No sessionData match your uniqueKey' })
+  }
 
-//1671707154436
+  console.log(`server_session: ${server_session}`)
+  console.log(`sessionData: ${sessionData}`) // { '1671707751991': { name: 'nodejs' } }
+  return res
+    .status(200)
+    .json({
+      Your_uniqueKey: uniqueKey, 
+      data_matched_in_server_session: sessionData
+    }); 
+})
